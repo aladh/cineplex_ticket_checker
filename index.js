@@ -6,14 +6,14 @@ const BASE_URL = 'https://www.cineplex.com/Movie/';
 const EMAIL_ADDRESS = '';
 const MOVIES = [];
 
-function getResponse(url) {
+function fetch(url) {
   return new Promise((resolve, reject) => {
     https
-      .get(url, (resp) => {
+      .get(url, resp => {
         const { statusCode } = resp;
-        let data = '';
-
         if (statusCode !== 200) reject(`Status code: ${statusCode}`);
+
+        let data = '';
         resp.on('data', chunk => data += chunk);
         resp.on('end', () => resolve(data));
       })
@@ -21,12 +21,10 @@ function getResponse(url) {
   })
 }
 
-function sendEmail({ subject, body }) {
-  const to = [EMAIL_ADDRESS];
-
+function sendEmail({ to, subject, body }) {
   ses.sendEmail({
-      Source: to[0],
-      Destination: { ToAddresses: to },
+      Source: to,
+      Destination: { ToAddresses: [to] },
       Message: {
         Subject: {
           Data: subject
@@ -37,42 +35,37 @@ function sendEmail({ subject, body }) {
           }
         }
       }
-    }
-    , function (err, _data) {
-      if (err) {
-        throw err
-      }
-
-      console.log('Email sent:');
+    }, (err, _data) => {
+      if (err) throw err;
     });
 }
 
-function ticketsAvailable(movie) {
+function checkSaleStatus(movie) {
   return new Promise((resolve, reject) => {
     console.log('Checking ' + movie);
 
-    getResponse(BASE_URL + movie)
+    fetch(BASE_URL + movie)
       .then((html) => {
         let onSale = html.includes('quick-tickets');
         console.log(movie + ' ' + onSale);
 
         resolve(onSale)
       })
-      .catch((err) => {
+      .catch(err => {
         console.log(err);
-
         reject(err)
       })
   })
 }
 
-function emailIfAvailable(movies) {
+function emailIfOnSale(movies) {
   return new Promise((_, reject) => {
     movies.forEach((movie) => {
-      ticketsAvailable(movie)
-        .then((available) => {
-          if (available) {
+      checkSaleStatus(movie)
+        .then(onSale => {
+          if (onSale) {
             sendEmail({
+              to: EMAIL_ADDRESS,
               subject: `Cineplex tickets on sale for ${movie}`,
               body: `${BASE_URL}${movie}`
             })
@@ -80,6 +73,7 @@ function emailIfAvailable(movies) {
         })
         .catch((err) => {
           sendEmail({
+            to: EMAIL_ADDRESS,
             subject: `Cineplex checker failed for ${movie}`,
             body: `${err} ${BASE_URL}${movie}`
           });
@@ -91,6 +85,6 @@ function emailIfAvailable(movies) {
 }
 
 exports.handler = (event, context, callback) => {
-  emailIfAvailable(MOVIES)
+  emailIfOnSale(MOVIES)
     .catch(callback)
 };
