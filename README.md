@@ -1,4 +1,4 @@
 # cineplex_ticket_checker
 Used as a Cron triggered AWS Lambda
 
-Fill in email and movie variables
+Fill in EMAIL_ADDRESS, THEATRE_IDS, and MOVIES constants
