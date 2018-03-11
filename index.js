@@ -4,6 +4,7 @@ const ses = new AWS.SES();
 
 const BASE_URL = 'https://www.cineplex.com/Movie/';
 const EMAIL_ADDRESS = '';
+const THEATRE_IDS = [];
 const MOVIES = [];
 
 function fetch(url) {
@@ -46,7 +47,11 @@ function checkSaleStatus(movie) {
 
     fetch(BASE_URL + movie)
       .then((html) => {
-        let onSale = html.includes('quick-tickets');
+        let onSale =
+          THEATRE_IDS
+            .map(id => html.includes(id))
+            .some(included => included === true);
+
         console.log(movie + ' ' + onSale);
 
         resolve(onSale)
