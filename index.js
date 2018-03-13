@@ -23,73 +23,60 @@ function fetch(url) {
 }
 
 function sendEmail({ to, subject, body }) {
+  // noinspection JSUnusedLocalSymbols
   ses.sendEmail({
-      Source: to,
-      Destination: { ToAddresses: [to] },
-      Message: {
-        Subject: {
-          Data: subject
-        },
-        Body: {
-          Text: {
-            Data: body
-          }
+    Source: to,
+    Destination: { ToAddresses: [to] },
+    Message: {
+      Subject: {
+        Data: subject
+      },
+      Body: {
+        Text: {
+          Data: body
         }
       }
-    }, (err, _data) => {
-      if (err) throw err;
-    });
+    }
+  }, (err, _data) => {
+    if (err) throw err;
+  });
 }
 
-function checkSaleStatus(movie) {
+function checkAvailability(movie) {
   return new Promise((resolve, reject) => {
-    console.log('Checking ' + movie);
-
     fetch(BASE_URL + movie)
       .then((html) => {
-        let onSale =
+        let available =
           THEATRE_IDS
             .map(id => html.includes(id))
-            .some(included => included === true);
+            .includes(true);
 
-        console.log(movie + ' ' + onSale);
+        console.log(movie + ' ' + available);
 
-        resolve(onSale)
+        resolve(available)
       })
-      .catch(err => {
-        console.log(err);
-        reject(err)
-      })
+      .catch(reject)
   })
 }
 
-function emailIfOnSale(movies) {
-  return new Promise((_, reject) => {
-    movies.forEach((movie) => {
-      checkSaleStatus(movie)
-        .then(onSale => {
-          if (onSale) {
-            sendEmail({
-              to: EMAIL_ADDRESS,
-              subject: `Cineplex tickets on sale for ${movie}`,
-              body: `${BASE_URL}${movie}`
-            })
-          }
-        })
-        .catch((err) => {
+exports.handler = () => {
+  MOVIES.forEach(movie => {
+    checkAvailability(movie)
+      .then(available => {
+        if (available) {
           sendEmail({
             to: EMAIL_ADDRESS,
-            subject: `Cineplex checker failed for ${movie}`,
-            body: `${err} ${BASE_URL}${movie}`
-          });
-
-          reject(err)
+            subject: `Cineplex tickets available for ${movie}`,
+            body: `${BASE_URL}${movie}`
+          })
+        }
+      })
+      .catch(e => {
+        sendEmail({
+          to: EMAIL_ADDRESS,
+          subject: `Cineplex availability checker failed for ${movie}`,
+          body: `${e} ${BASE_URL}${movie}`
         })
-    })
+      })
   })
-}
-
-exports.handler = (event, context, callback) => {
-  emailIfOnSale(MOVIES)
-    .catch(callback)
 };
