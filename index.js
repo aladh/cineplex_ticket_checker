@@ -47,7 +47,7 @@ function sendEmail({ to, subject, body }) {
   })
 }
 
-async function checkAvailability(movie) {
+async function isAvailable(movie) {
   const html = await fetch(BASE_URL + movie);
 
   return THEATRE_IDS
@@ -58,7 +58,7 @@ async function checkAvailability(movie) {
 exports.handler = () => {
   MOVIES.forEach(async (movie) => {
     try {
-      await checkAvailability(movie) && sendEmail({
+      await isAvailable(movie) && sendEmail({
         to: EMAIL_ADDRESS,
         subject: `Cineplex tickets available for ${movie}`,
         body: `${BASE_URL}${movie}`
