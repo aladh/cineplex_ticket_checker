@@ -14,14 +14,15 @@ function fetch(url) {
     get(url, (res) => {
       const { statusCode } = res;
 
-      if (statusCode === 200) {
-        let data = '';
-        res.on('data', (chunk) => data += chunk);
-        res.on('end', () => resolve(data))
-      } else {
-        reject(`Status code: ${statusCode}`);
-        res.destroy()
+      if (statusCode !== 200) {
+        reject(`Bad status code: ${statusCode}`);
+        res.destroy();
+        return
       }
+
+      let data = '';
+      res.on('data', (chunk) => data += chunk);
+      res.on('end', () => resolve(data))
     })
       .on('error', reject)
   })
