@@ -1,4 +1,4 @@
-const https = require('https');
+const { get } = require('https');
 // noinspection NpmUsedModulesInstalled
 const AWS = require('aws-sdk');
 // noinspection JSUnresolvedFunction
@@ -11,15 +11,18 @@ const MOVIES = [];
 
 function fetch(url) {
   return new Promise((resolve, reject) => {
-    https
-      .get(url, (resp) => {
-        const { statusCode } = resp;
-        if (statusCode !== 200) reject(`Status code: ${statusCode}`);
+    get(url, (res) => {
+      const { statusCode } = res;
 
+      if (statusCode === 200) {
         let data = '';
-        resp.on('data', (chunk) => data += chunk);
-        resp.on('end', () => resolve(data));
-      })
+        res.on('data', (chunk) => data += chunk);
+        res.on('end', () => resolve(data))
+      } else {
+        reject(`Status code: ${statusCode}`);
+        res.destroy()
+      }
+    })
       .on('error', reject)
   })
 }
