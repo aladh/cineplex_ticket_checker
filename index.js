@@ -43,29 +43,32 @@ function sendEmail({ to, subject, body }) {
       }
     }
   }, (err, _data) => {
-    if (err) throw err;
+    if (err) throw err
   })
 }
 
 async function checkAvailability(movie) {
   const html = await fetch(BASE_URL + movie);
-  const available =
-    THEATRE_IDS
-      .map((id) => html.includes(id))
-      .includes(true);
 
-  console.log(movie + ' ' + available);
-
-  return available
+  return THEATRE_IDS
+    .map((id) => html.includes(id))
+    .includes(true)
 }
 
 exports.handler = () => {
   MOVIES.forEach(async (movie) => {
     try {
-      const available = await checkAvailability(movie);
-      available && sendEmail({ to: EMAIL_ADDRESS, subject: `Cineplex tickets available for ${movie}`, body: `${BASE_URL}${movie}` })
+      await checkAvailability(movie) && sendEmail({
+        to: EMAIL_ADDRESS,
+        subject: `Cineplex tickets available for ${movie}`,
+        body: `${BASE_URL}${movie}`
+      })
     } catch (e) {
-      sendEmail({ to: EMAIL_ADDRESS, subject: `Cineplex availability checker failed for ${movie}`, body: `${e} ${BASE_URL}${movie}` })
+      sendEmail({
+        to: EMAIL_ADDRESS,
+        subject: `Cineplex availability checker failed for ${movie}`,
+        body: `Error: ${e} for ${BASE_URL}${movie}`
+      })
     }
   })
 };
