@@ -5,8 +5,7 @@ const AWS = require('aws-sdk');
 const ses = new AWS.SES();
 
 const BASE_URL = 'https://www.cineplex.com/Movie/';
-const EMAIL_ADDRESS = '';
-const THEATRE_IDS = [];
+const THEATRE_IDS = JSON.parse(process.env.THEATRE_IDS);
 const MOVIES = [];
 
 function fetch(url) {
@@ -60,13 +59,13 @@ exports.handler = () => {
   MOVIES.forEach(async (movie) => {
     try {
       await isAvailable(movie) && sendEmail({
-        to: EMAIL_ADDRESS,
+        to: process.env.EMAIL_ADDRESS,
         subject: `Cineplex tickets available for ${movie}`,
         body: `${BASE_URL}${movie}`
       })
     } catch (e) {
       sendEmail({
-        to: EMAIL_ADDRESS,
+        to: process.env.EMAIL_ADDRESS,
         subject: `Cineplex availability checker failed for ${movie}`,
         body: `Error: ${e} for ${BASE_URL}${movie}`
       })
