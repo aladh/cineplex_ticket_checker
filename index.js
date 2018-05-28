@@ -1,8 +1,8 @@
 const { get } = require('https');
 // noinspection NpmUsedModulesInstalled
-const AWS = require('aws-sdk');
+const SES = require('aws-sdk/clients/ses');
 // noinspection JSUnresolvedFunction
-const ses = new AWS.SES();
+const ses = new SES();
 
 const BASE_URL = 'https://www.cineplex.com/Movie/';
 const THEATRE_IDS = JSON.parse(process.env.THEATRE_IDS);
