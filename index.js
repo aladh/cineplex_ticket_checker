@@ -50,6 +50,10 @@ function sendEmail({ to, subject, body }) {
 async function isAvailable(movie) {
   const html = await fetch(BASE_URL + movie);
 
+  if (!html.includes('quick-tickets')) {
+    return false
+  }
+
   return THEATRE_IDS
     .map((id) => html.includes(id))
     .includes(true)
