@@ -1,0 +1,14 @@
+stages:
+  - test
+  - build
+
+lint:
+  stage: test
+  image: golangci/golangci-lint:v1.27.0
+  script:
+    - golangci-lint run -v -E golint -E gofmt -E goconst -E interfacer -E gocritic -E gocognit -E gocyclo
+
+binary:
+  stage: build
+  image: golang:1.14-buster
+  script: go build
