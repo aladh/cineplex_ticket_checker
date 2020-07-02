@@ -24,6 +24,6 @@ check-availability:
   before_script:
     - go build
   script:
-    - ./cineplex_ticket_checker -t $THEATRE_ID $MOVIE
+    - ./cineplex_ticket_checker -t $THEATRE_IDS $MOVIES
   only:
     - schedules
