@@ -14,7 +14,8 @@ func main() {
 	theatreID := flag.String("t", "", "ID of the theatre to check")
 	flag.Parse()
 
-	url := baseURL + flag.Arg(0)
+	movie := flag.Arg(0)
+	url := baseURL + movie
 
 	res, err := http.Get(url)
 	if err != nil {
@@ -27,5 +28,9 @@ func main() {
 		log.Printf("error reading response body: %s\n", err)
 	}
 
-	log.Println(strings.Contains(string(html), *theatreID))
+	available := strings.Contains(string(html), *theatreID)
+
+	if available {
+		log.Fatalf("%s is available at %s\n", movie, *theatreID)
+	}
 }
