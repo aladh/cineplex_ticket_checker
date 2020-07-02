@@ -52,6 +52,8 @@ func spawnWorkers(movies *[]string, theatreIDs *string) chan string {
 }
 
 func isAvailable(movie *string, theatreIDs *string) bool {
+	log.Printf("Checking %s\n", *movie)
+
 	url := baseURL + *movie
 
 	res, err := http.Get(url)
