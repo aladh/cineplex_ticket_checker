@@ -16,30 +16,39 @@ func main() {
 	theatreIDs := flag.String("t", "", "A comma-separated list of theatre IDs to look for")
 	flag.Parse()
 
-	movie := flag.Arg(0)
-	availableMovies := make(chan string, 1)
-	wg := sync.WaitGroup{}
+	movies := strings.Split(flag.Arg(0), ",")
 
-	wg.Add(1)
+	availableChan := spawnWorkers(&movies, theatreIDs)
 
-	go func(availableMovies chan<- string) {
-		defer wg.Done()
-
-		if isAvailable(&movie, theatreIDs) {
-			availableMovies <- movie
-		}
-	}(availableMovies)
-
-	wg.Wait()
-	close(availableMovies)
-
-	if len(availableMovies) > 0 {
-		for movie := range availableMovies {
+	if len(availableChan) > 0 {
+		for movie := range availableChan {
 			log.Printf("Tickets to %s are available\n", movie)
 		}
 
 		log.Fatalln("Go buy tickets!")
 	}
+}
+
+func spawnWorkers(movies *[]string, theatreIDs *string) chan string {
+	availableChan := make(chan string, len(*movies))
+	wg := sync.WaitGroup{}
+
+	for _, movie := range *movies {
+		wg.Add(1)
+
+		go func(movie string, theatreIDs *string, availableChan chan<- string) {
+			defer wg.Done()
+
+			if isAvailable(&movie, theatreIDs) {
+				availableChan <- movie
+			}
+		}(movie, theatreIDs, availableChan)
+	}
+
+	wg.Wait()
+	close(availableChan)
+
+	return availableChan
 }
 
 func isAvailable(movie *string, theatreIDs *string) bool {
