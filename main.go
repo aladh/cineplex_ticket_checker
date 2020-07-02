@@ -5,11 +5,15 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"strings"
 )
 
 const baseURL = "https://www.cineplex.com/Movie/"
 
 func main() {
+	theatreID := flag.String("t", "", "ID of the theatre to check")
+	flag.Parse()
+
 	url := baseURL + flag.Arg(0)
 
 	res, err := http.Get(url)
@@ -23,5 +27,5 @@ func main() {
 		log.Printf("error reading response body: %s\n", err)
 	}
 
-	log.Printf("%s\n", html)
+	log.Println(strings.Contains(string(html), *theatreID))
 }
