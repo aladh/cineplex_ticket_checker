@@ -20,7 +20,7 @@ binary:
 
 check-availability:
   stage: run
-  image: scratch
+  image: golang:1.14-buster
   before_script:
     - go build
   script:
