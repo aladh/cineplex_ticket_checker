@@ -5,13 +5,14 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"regexp"
 	"strings"
 )
 
 const baseURL = "https://www.cineplex.com/Movie/"
 
 func main() {
-	theatreID := flag.String("t", "", "ID of the theatre to check")
+	theatreIDs := flag.String("t", "", "A comma-separated list of theatre IDs to look for")
 	flag.Parse()
 
 	movie := flag.Arg(0)
@@ -28,9 +29,11 @@ func main() {
 		log.Printf("error reading response body: %s\n", err)
 	}
 
-	available := strings.Contains(string(html), *theatreID)
-
-	if available {
-		log.Fatalf("%s is available at %s\n", movie, *theatreID)
+	if isAvailable(theatreIDs, &html) {
+		log.Fatalf("Tickets to %s are available\n", movie)
 	}
+}
+
+func isAvailable(theatreIDs *string, html *[]byte) bool {
+	return regexp.MustCompile(strings.ReplaceAll(*theatreIDs, ",", "|")).MatchString(string(*html))
 }
