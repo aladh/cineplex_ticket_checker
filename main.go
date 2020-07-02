@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"regexp"
 	"strings"
+	"sync"
 )
 
 const baseURL = "https://www.cineplex.com/Movie/"
@@ -16,7 +17,33 @@ func main() {
 	flag.Parse()
 
 	movie := flag.Arg(0)
-	url := baseURL + movie
+	availableMovies := make(chan string, 1)
+	wg := sync.WaitGroup{}
+
+	wg.Add(1)
+
+	go func(availableMovies chan<- string) {
+		defer wg.Done()
+
+		if isAvailable(&movie, theatreIDs) {
+			availableMovies <- movie
+		}
+	}(availableMovies)
+
+	wg.Wait()
+	close(availableMovies)
+
+	if len(availableMovies) > 0 {
+		for movie := range availableMovies {
+			log.Printf("Tickets to %s are available\n", movie)
+		}
+
+		log.Fatalln("Go buy tickets!")
+	}
+}
+
+func isAvailable(movie *string, theatreIDs *string) bool {
+	url := baseURL + *movie
 
 	res, err := http.Get(url)
 	if err != nil {
@@ -29,11 +56,5 @@ func main() {
 		log.Printf("error reading response body: %s\n", err)
 	}
 
-	if isAvailable(theatreIDs, &html) {
-		log.Fatalf("Tickets to %s are available\n", movie)
-	}
-}
-
-func isAvailable(theatreIDs *string, html *[]byte) bool {
-	return regexp.MustCompile(strings.ReplaceAll(*theatreIDs, ",", "|")).MatchString(string(*html))
+	return regexp.MustCompile(strings.ReplaceAll(*theatreIDs, ",", "|")).MatchString(string(html))
 }
