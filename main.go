@@ -38,7 +38,7 @@ func checkMovies(movies *[]string, theatreIDs *string) chan string {
 
 			available, err := isAvailable(&movie, theatreIDs)
 			if err != nil {
-				log.Printf("Failed to check availability: %s\n", err)
+				log.Printf("error checking availability: %s\n", err)
 				return
 			}
 
@@ -62,9 +62,14 @@ func isAvailable(movie *string, theatreIDs *string) (bool, error) {
 
 	res, err := http.Get(url)
 	if err != nil {
-		log.Printf("error making request: %s\n", err)
+		return false, fmt.Errorf("error making request: %w", err)
 	}
-	defer res.Body.Close()
+	defer func() {
+		closeErr := res.Body.Close()
+		if closeErr != nil {
+			err = fmt.Errorf("error closing response body: %w", err)
+		}
+	}()
 
 	html, err := ioutil.ReadAll(res.Body)
 	if err != nil {
