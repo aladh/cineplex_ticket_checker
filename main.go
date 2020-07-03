@@ -2,6 +2,7 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -35,7 +36,13 @@ func checkMovies(movies *[]string, theatreIDs *string) chan string {
 		go func(movie string, theatreIDs *string, availableChan chan<- string) {
 			defer wg.Done()
 
-			if isAvailable(&movie, theatreIDs) {
+			available, err := isAvailable(&movie, theatreIDs)
+			if err != nil {
+				log.Printf("Failed to check availability: %s\n", err)
+				return
+			}
+
+			if available {
 				log.Printf("Tickets to %s are available\n", movie)
 				availableChan <- movie
 			}
@@ -48,7 +55,7 @@ func checkMovies(movies *[]string, theatreIDs *string) chan string {
 	return availableChan
 }
 
-func isAvailable(movie *string, theatreIDs *string) bool {
+func isAvailable(movie *string, theatreIDs *string) (bool, error) {
 	log.Printf("Checking %s\n", *movie)
 
 	url := baseURL + *movie
@@ -59,12 +66,14 @@ func isAvailable(movie *string, theatreIDs *string) bool {
 	}
 	defer res.Body.Close()
 
-	// Check for 404 response
-
 	html, err := ioutil.ReadAll(res.Body)
 	if err != nil {
 		log.Printf("error reading response body: %s\n", err)
 	}
 
-	return regexp.MustCompile(strings.ReplaceAll(*theatreIDs, ",", "|")).MatchString(string(html))
+	if strings.Contains(string(html), "January 1, 0001") {
+		return false, fmt.Errorf("failed to find movie %s", *movie)
+	}
+
+	return regexp.MustCompile(strings.ReplaceAll(*theatreIDs, ",", "|")).MatchString(string(html)), nil
 }
