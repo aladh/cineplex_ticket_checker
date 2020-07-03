@@ -18,7 +18,7 @@ func main() {
 
 	movies := strings.Split(flag.Arg(0), ",")
 
-	availableChan := spawnWorkers(&movies, theatreIDs)
+	availableChan := checkMovies(&movies, theatreIDs)
 
 	if len(availableChan) > 0 {
 		for movie := range availableChan {
@@ -29,7 +29,7 @@ func main() {
 	}
 }
 
-func spawnWorkers(movies *[]string, theatreIDs *string) chan string {
+func checkMovies(movies *[]string, theatreIDs *string) chan string {
 	availableChan := make(chan string, len(*movies))
 	wg := sync.WaitGroup{}
 
@@ -61,6 +61,8 @@ func isAvailable(movie *string, theatreIDs *string) bool {
 		log.Printf("error making request: %s\n", err)
 	}
 	defer res.Body.Close()
+
+	// Check for 404 response
 
 	html, err := ioutil.ReadAll(res.Body)
 	if err != nil {
