@@ -21,10 +21,6 @@ func main() {
 	availableChan := checkMovies(&movies, theatreIDs)
 
 	if len(availableChan) > 0 {
-		for movie := range availableChan {
-			log.Printf("Tickets to %s are available\n", movie)
-		}
-
 		log.Fatalln("Go buy tickets!")
 	}
 }
@@ -40,6 +36,7 @@ func checkMovies(movies *[]string, theatreIDs *string) chan string {
 			defer wg.Done()
 
 			if isAvailable(&movie, theatreIDs) {
+				log.Printf("Tickets to %s are available\n", movie)
 				availableChan <- movie
 			}
 		}(movie, theatreIDs, availableChan)
