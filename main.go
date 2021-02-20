@@ -26,14 +26,6 @@ func init() {
 }
 
 func main() {
-	availableChan := checkMovies()
-
-	if len(availableChan) > 0 {
-		log.Fatalln("Go buy tickets!")
-	}
-}
-
-func checkMovies() chan string {
 	availableChan := make(chan string, len(movies))
 	wg := sync.WaitGroup{}
 
@@ -59,7 +51,9 @@ func checkMovies() chan string {
 	wg.Wait()
 	close(availableChan)
 
-	return availableChan
+	if len(availableChan) > 0 {
+		log.Fatalln("Go buy tickets!")
+	}
 }
 
 func isAvailable(movie *string) (bool, error) {
