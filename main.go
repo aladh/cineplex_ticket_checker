@@ -35,7 +35,7 @@ func main() {
 		go func(movie string, availableChan chan<- string) {
 			defer wg.Done()
 
-			available, err := isAvailable(&movie)
+			available, err := isAvailable(movie)
 			if err != nil {
 				log.Printf("error checking availability: %s\n", err)
 				return
@@ -56,10 +56,10 @@ func main() {
 	}
 }
 
-func isAvailable(movie *string) (bool, error) {
-	log.Printf("Checking %s\n", *movie)
+func isAvailable(movie string) (bool, error) {
+	log.Printf("Checking %s\n", movie)
 
-	url := baseURL + *movie
+	url := baseURL + movie
 
 	res, err := http.Get(url)
 	if err != nil {
@@ -78,7 +78,7 @@ func isAvailable(movie *string) (bool, error) {
 	}
 
 	if strings.Contains(string(html), "January 1, 0001") {
-		return false, fmt.Errorf("failed to find movie %s", *movie)
+		return false, fmt.Errorf("failed to find movie %s", movie)
 	}
 
 	return theatreIDsRegex.MatchString(string(html)), nil
