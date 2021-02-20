@@ -61,7 +61,13 @@ func isAvailable(movie string) (bool, error) {
 
 	url := baseURL + movie
 
-	res, err := http.Get(url)
+	client := &http.Client{
+		CheckRedirect: func(req *http.Request, via []*http.Request) error {
+			return http.ErrUseLastResponse
+		},
+	}
+
+	res, err := client.Get(url)
 	if err != nil {
 		return false, fmt.Errorf("error making request: %w", err)
 	}
@@ -72,13 +78,13 @@ func isAvailable(movie string) (bool, error) {
 		}
 	}()
 
+	if res.StatusCode != 200 {
+		return false, fmt.Errorf("failed to find movie %s", movie)
+	}
+
 	html, err := ioutil.ReadAll(res.Body)
 	if err != nil {
 		log.Printf("error reading response body: %s\n", err)
-	}
-
-	if strings.Contains(string(html), "January 1, 0001") {
-		return false, fmt.Errorf("failed to find movie %s", movie)
 	}
 
 	return theatreIDsRegex.MatchString(string(html)), nil
