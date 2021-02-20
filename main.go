@@ -14,25 +14,26 @@ import (
 const baseURL = "https://www.cineplex.com/Movie/"
 
 var theatreIDsRegex *regexp.Regexp
+var movies []string
 
 func init() {
 	theatreIDs := flag.String("t", "", "A comma-separated list of theatre IDs to look for")
 	flag.Parse()
 
 	theatreIDsRegex = regexp.MustCompile(strings.ReplaceAll(*theatreIDs, ",", "|"))
+
+	movies = strings.Split(flag.Arg(0), ",")
 }
 
 func main() {
-	movies := strings.Split(flag.Arg(0), ",")
-
-	availableChan := checkMovies(movies)
+	availableChan := checkMovies()
 
 	if len(availableChan) > 0 {
 		log.Fatalln("Go buy tickets!")
 	}
 }
 
-func checkMovies(movies []string) chan string {
+func checkMovies() chan string {
 	availableChan := make(chan string, len(movies))
 	wg := sync.WaitGroup{}
 
