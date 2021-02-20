@@ -13,30 +13,36 @@ import (
 
 const baseURL = "https://www.cineplex.com/Movie/"
 
-func main() {
+var theatreIDsRegex *regexp.Regexp
+
+func init() {
 	theatreIDs := flag.String("t", "", "A comma-separated list of theatre IDs to look for")
 	flag.Parse()
 
+	theatreIDsRegex = regexp.MustCompile(strings.ReplaceAll(*theatreIDs, ",", "|"))
+}
+
+func main() {
 	movies := strings.Split(flag.Arg(0), ",")
 
-	availableChan := checkMovies(movies, theatreIDs)
+	availableChan := checkMovies(movies)
 
 	if len(availableChan) > 0 {
 		log.Fatalln("Go buy tickets!")
 	}
 }
 
-func checkMovies(movies []string, theatreIDs *string) chan string {
+func checkMovies(movies []string) chan string {
 	availableChan := make(chan string, len(movies))
 	wg := sync.WaitGroup{}
 
 	for _, movie := range movies {
 		wg.Add(1)
 
-		go func(movie string, theatreIDs *string, availableChan chan<- string) {
+		go func(movie string, availableChan chan<- string) {
 			defer wg.Done()
 
-			available, err := isAvailable(&movie, theatreIDs)
+			available, err := isAvailable(&movie)
 			if err != nil {
 				log.Printf("error checking availability: %s\n", err)
 				return
@@ -46,7 +52,7 @@ func checkMovies(movies []string, theatreIDs *string) chan string {
 				log.Printf("Tickets to %s are available\n", movie)
 				availableChan <- movie
 			}
-		}(movie, theatreIDs, availableChan)
+		}(movie, availableChan)
 	}
 
 	wg.Wait()
@@ -55,7 +61,7 @@ func checkMovies(movies []string, theatreIDs *string) chan string {
 	return availableChan
 }
 
-func isAvailable(movie *string, theatreIDs *string) (bool, error) {
+func isAvailable(movie *string) (bool, error) {
 	log.Printf("Checking %s\n", *movie)
 
 	url := baseURL + *movie
@@ -80,5 +86,5 @@ func isAvailable(movie *string, theatreIDs *string) (bool, error) {
 		return false, fmt.Errorf("failed to find movie %s", *movie)
 	}
 
-	return regexp.MustCompile(strings.ReplaceAll(*theatreIDs, ",", "|")).MatchString(string(html)), nil
+	return theatreIDsRegex.MatchString(string(html)), nil
 }
