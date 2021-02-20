@@ -19,18 +19,18 @@ func main() {
 
 	movies := strings.Split(flag.Arg(0), ",")
 
-	availableChan := checkMovies(&movies, theatreIDs)
+	availableChan := checkMovies(movies, theatreIDs)
 
 	if len(availableChan) > 0 {
 		log.Fatalln("Go buy tickets!")
 	}
 }
 
-func checkMovies(movies *[]string, theatreIDs *string) chan string {
-	availableChan := make(chan string, len(*movies))
+func checkMovies(movies []string, theatreIDs *string) chan string {
+	availableChan := make(chan string, len(movies))
 	wg := sync.WaitGroup{}
 
-	for _, movie := range *movies {
+	for _, movie := range movies {
 		wg.Add(1)
 
 		go func(movie string, theatreIDs *string, availableChan chan<- string) {
