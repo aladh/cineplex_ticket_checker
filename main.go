@@ -3,7 +3,7 @@ package main
 import (
 	"flag"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"log"
 	"net/http"
 	"regexp"
@@ -82,7 +82,7 @@ func isAvailable(movie string) (bool, error) {
 		return false, fmt.Errorf("failed to find movie %s", movie)
 	}
 
-	html, err := ioutil.ReadAll(res.Body)
+	html, err := io.ReadAll(res.Body)
 	if err != nil {
 		log.Printf("error reading response body: %s\n", err)
 	}
