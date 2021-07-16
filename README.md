@@ -1,10 +1,16 @@
-# Cineplex Ticker Checker
-Sends you an email when tickets are on sale for a movie
+# Cineplex Ticket Checker
+Sends an email when tickets are on sale for a movie.
 
 ### Configuration
-Deployed as a Cron triggered AWS Lambda
 
-- Set environment variable EMAIL_ADDRESS with email to notify
-- Set environment variable THEATRE_IDS with JSON array of theatre IDs (ex. \["1", "2"]) you care about
-- Fill in MOVIES constant in index.js with a list of movie paths to check
-    - Example: "deadpool-2" from https://www.cineplex.com/Movie/deadpool-2 
+This repo is mirrored to GitLab, and runs a scheduled job to periodically check for new movies.
+
+The CLI can be used as follows:
+
+```shell
+cineplex_ticket_checker -t 1234 example-movie1,example-movie2
+```
+
+`t` is a comma-separated list of theatre IDs to check for
+
+`example-movie1` is the path portion of a movie URL (ex. https://www.cineplex.com/Movie/example-movie1)
