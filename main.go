@@ -2,16 +2,19 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"log"
 	"strings"
 
 	"github.com/ali-l/cineplex_ticket_checker/checker"
+	"github.com/ali-l/cineplex_ticket_checker/webhook"
 )
 
 func main() {
 	theatreIDs := flag.String("t", "", "A comma-separated list of theatre IDs to look for")
-	flag.Parse()
+	webhookURL := flag.String("w", "", "A URL to send webhooks to when movies are available")
 	movies := strings.Split(flag.Arg(0), ",")
+	flag.Parse()
 
 	availableMovies, err := checker.AvailableMovies(movies, *theatreIDs)
 	if err != nil {
@@ -19,10 +22,14 @@ func main() {
 	}
 
 	for _, movie := range availableMovies {
-		log.Printf("Tickets to %s are available\n", movie)
-	}
+		message := fmt.Sprintf("Tickets to %s are available: %s", movie, checker.MovieUrl(movie))
+		log.Println(message)
 
-	if len(availableMovies) > 0 {
-		log.Fatalln("Go buy tickets!")
+		if len(*webhookURL) > 0 {
+			err := webhook.Send(*webhookURL, message)
+			if err != nil {
+				log.Fatalf("error sending webhook: %s", err)
+			}
+		}
 	}
 }

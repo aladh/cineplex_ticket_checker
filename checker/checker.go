@@ -53,10 +53,12 @@ func AvailableMovies(movies []string, theatreIDs string) ([]string, error) {
 	return nil, nil
 }
 
+func MovieUrl(movie string) string {
+	return baseURL + movie
+}
+
 func isAvailable(movie string) (bool, error) {
 	log.Printf("Checking %s\n", movie)
-
-	url := baseURL + movie
 
 	client := &http.Client{
 		CheckRedirect: func(req *http.Request, via []*http.Request) error {
@@ -65,7 +67,7 @@ func isAvailable(movie string) (bool, error) {
 		},
 	}
 
-	res, err := client.Get(url)
+	res, err := client.Get(MovieUrl(movie))
 	if err != nil {
 		return false, fmt.Errorf("error making request: %w", err)
 	}
