@@ -13,8 +13,8 @@ import (
 func main() {
 	theatreIDs := flag.String("t", "", "A comma-separated list of theatre IDs to look for")
 	webhookURL := flag.String("w", "", "A URL to send webhooks to when movies are available")
-	movies := strings.Split(flag.Arg(0), ",")
 	flag.Parse()
+	movies := strings.Split(flag.Arg(0), ",")
 
 	availableMovies, err := checker.AvailableMovies(movies, *theatreIDs)
 	if err != nil {
