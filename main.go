@@ -6,8 +6,8 @@ import (
 	"log"
 	"strings"
 
-	"github.com/ali-l/cineplex_ticket_checker/checker"
-	"github.com/ali-l/cineplex_ticket_checker/webhook"
+	"github.com/aladh/cineplex_ticket_checker/checker"
+	"github.com/aladh/cineplex_ticket_checker/webhook"
 )
 
 func main() {

@@ -1,3 +1,3 @@
-module github.com/ali-l/cineplex_ticket_checker
+module github.com/aladh/cineplex_ticket_checker
 
 go 1.16
