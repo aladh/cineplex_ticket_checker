@@ -11,6 +11,7 @@ import (
 )
 
 const baseURL = "https://www.cineplex.com/Movie/"
+const availableMessage = "Check out showtimes for this movie"
 
 var theatreIDsRegex *regexp.Regexp
 
@@ -82,12 +83,18 @@ func isAvailable(movie string) (bool, error) {
 		return false, fmt.Errorf("received bad response %s for movie %s", res.Status, movie)
 	}
 
-	html, err := io.ReadAll(res.Body)
+	respBytes, err := io.ReadAll(res.Body)
 	if err != nil {
 		return false, fmt.Errorf("error reading response body: %s\n", err)
 	}
 
-	return theatreIDsRegex.MatchString(string(html)), nil
+	html := string(respBytes)
+
+	if !strings.Contains(html, availableMessage) { // reduce false positives by checking for this
+		return false, nil
+	}
+
+	return theatreIDsRegex.MatchString(html), nil
 }
 
 func toSlice(c chan string) []string {
