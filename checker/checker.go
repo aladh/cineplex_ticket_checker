@@ -90,7 +90,8 @@ func isAvailable(movie string) (bool, error) {
 
 	html := string(respBytes)
 
-	if !strings.Contains(html, availableMessage) { // reduce false positives by checking for this
+	// reduce false positives by checking for this
+	if !strings.Contains(html, availableMessage) {
 		return false, nil
 	}
 
