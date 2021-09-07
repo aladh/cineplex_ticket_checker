@@ -21,6 +21,10 @@ func main() {
 		log.Fatalf("error checking availability: %s\n", err)
 	}
 
+	sendWebhooks(availableMovies, webhookURL)
+}
+
+func sendWebhooks(availableMovies []string, webhookURL *string) {
 	for _, movie := range availableMovies {
 		message := fmt.Sprintf("Tickets to %s are available: %s", movie, checker.MovieUrl(movie))
 		log.Println(message)
