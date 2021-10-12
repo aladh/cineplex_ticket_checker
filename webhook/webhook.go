@@ -7,14 +7,16 @@ import (
 	"net/http"
 )
 
+const avatarURL = "https://www.pci-group.com/wp-content/uploads/CineplexLogoSq.jpg"
 const contentType = "application/json"
 
 type payload struct {
-	Content string `json:"content"`
+	AvatarURL string `json:"avatar_url"`
+	Content   string `json:"content"`
 }
 
 func Send(url string, message string) error {
-	payload, err := json.Marshal(payload{Content: message})
+	payload, err := json.Marshal(payload{Content: message, AvatarURL: avatarURL})
 	if err != nil {
 		return fmt.Errorf("error marshalling json: %w", err)
 	}
