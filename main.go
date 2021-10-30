@@ -13,11 +13,13 @@ import (
 var theatreIDs string
 var webhookURL string
 
-func main() {
+func init() {
 	flag.StringVar(&theatreIDs, "t", "", "A comma-separated list of theatre IDs to look for")
 	flag.StringVar(&webhookURL, "w", "", "A URL to send webhooks to when movies are available")
 	flag.Parse()
+}
 
+func main() {
 	movies := strings.Split(flag.Arg(0), ",")
 	availableChan := make(chan string, len(movies))
 
