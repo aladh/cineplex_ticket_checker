@@ -10,27 +10,28 @@ import (
 	"github.com/aladh/cineplex_ticket_checker/webhook"
 )
 
+var theatreIDs string
+var webhookURL string
+
 func main() {
-	theatreIDs := flag.String("t", "", "A comma-separated list of theatre IDs to look for")
-	webhookURL := flag.String("w", "", "A URL to send webhooks to when movies are available")
+	flag.StringVar(&theatreIDs, "t", "", "A comma-separated list of theatre IDs to look for")
+	flag.StringVar(&webhookURL, "w", "", "A URL to send webhooks to when movies are available")
 	flag.Parse()
+
 	movies := strings.Split(flag.Arg(0), ",")
+	availableChan := make(chan string, len(movies))
 
-	availableMovies, err := checker.AvailableMovies(movies, *theatreIDs)
-	if err != nil {
-		log.Fatalf("error checking availability: %s\n", err)
-	}
-
-	sendWebhooks(availableMovies, webhookURL)
+	go checker.FindAvailableMovies(movies, theatreIDs, availableChan)
+	sendWebhooks(availableChan)
 }
 
-func sendWebhooks(availableMovies []string, webhookURL *string) {
-	for _, movie := range availableMovies {
+func sendWebhooks(availableChan <-chan string) {
+	for movie := range availableChan {
 		message := fmt.Sprintf("Tickets to %s are available: %s", movie, checker.MovieUrl(movie))
 		log.Println(message)
 
-		if len(*webhookURL) > 0 {
-			err := webhook.Send(*webhookURL, message)
+		if len(webhookURL) > 0 {
+			err := webhook.Send(webhookURL, message)
 			if err != nil {
 				log.Fatalf("error sending webhook: %s", err)
 			}

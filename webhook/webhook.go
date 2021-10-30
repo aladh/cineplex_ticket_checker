@@ -16,12 +16,12 @@ type payload struct {
 }
 
 func Send(url string, message string) error {
-	payload, err := json.Marshal(payload{Content: message, AvatarURL: avatarURL})
+	body, err := json.Marshal(payload{Content: message, AvatarURL: avatarURL})
 	if err != nil {
 		return fmt.Errorf("error marshalling json: %w", err)
 	}
 
-	resp, err := http.Post(url, contentType, bytes.NewReader(payload))
+	resp, err := http.Post(url, contentType, bytes.NewReader(body))
 	if err != nil {
 		return fmt.Errorf("error sending webhook: %w", err)
 	}
