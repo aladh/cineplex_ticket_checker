@@ -47,7 +47,7 @@ func isAvailable(movie string, theatreIDsRegex *regexp.Regexp) (bool, error) {
 	log.Printf("Checking %s\n", movie)
 
 	client := &http.Client{
-		CheckRedirect: func(req *http.Request, via []*http.Request) error {
+		CheckRedirect: func(_ *http.Request, _ []*http.Request) error {
 			// Don't follow redirects because movies that are not found redirect to the cineplex home page
 			return http.ErrUseLastResponse
 		},
