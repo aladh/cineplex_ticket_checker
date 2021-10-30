@@ -13,11 +13,9 @@ import (
 const baseURL = "https://www.cineplex.com/Movie/"
 const availableMessage = "Check out showtimes for this movie"
 
-var theatreIDsRegex *regexp.Regexp
-
 func FindAvailableMovies(movies []string, theatreIDs string, availableChan chan<- string) {
 	wg := sync.WaitGroup{}
-	theatreIDsRegex = regexp.MustCompile(strings.ReplaceAll(theatreIDs, ",", "|"))
+	theatreIDsRegex := regexp.MustCompile(strings.ReplaceAll(theatreIDs, ",", "|"))
 
 	for _, movie := range movies {
 		wg.Add(1)
@@ -25,7 +23,7 @@ func FindAvailableMovies(movies []string, theatreIDs string, availableChan chan<
 		go func(movie string) {
 			defer wg.Done()
 
-			available, err := isAvailable(movie)
+			available, err := isAvailable(movie, theatreIDsRegex)
 			if err != nil {
 				log.Fatalf("error checking movie %s: %s\n", movie, err)
 				return
@@ -45,7 +43,7 @@ func MovieUrl(movie string) string {
 	return baseURL + movie
 }
 
-func isAvailable(movie string) (bool, error) {
+func isAvailable(movie string, theatreIDsRegex *regexp.Regexp) (bool, error) {
 	log.Printf("Checking %s\n", movie)
 
 	client := &http.Client{
