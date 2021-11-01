@@ -19,6 +19,10 @@ func FindAvailableMovies(movies []string, theatreIDs string) <-chan string {
 	return availableMovies
 }
 
+func MovieUrl(movie string) string {
+	return baseURL + movie
+}
+
 func findAvailableMoviesAsync(movies []string, theatreIDs string, availableChan chan<- string) {
 	wg := sync.WaitGroup{}
 	theatreIDsRegex := regexp.MustCompile(strings.ReplaceAll(theatreIDs, ",", "|"))
@@ -43,10 +47,6 @@ func findAvailableMoviesAsync(movies []string, theatreIDs string, availableChan 
 
 	wg.Wait()
 	close(availableChan)
-}
-
-func MovieUrl(movie string) string {
-	return baseURL + movie
 }
 
 func isAvailable(movie string, theatreIDsRegex *regexp.Regexp) (bool, error) {
