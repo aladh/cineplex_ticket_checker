@@ -13,7 +13,13 @@ import (
 const baseURL = "https://www.cineplex.com/Movie/"
 const availableMessage = "Check out showtimes for this movie"
 
-func FindAvailableMovies(movies []string, theatreIDs string, availableChan chan<- string) {
+func FindAvailableMovies(movies []string, theatreIDs string) <-chan string {
+	availableMovies := make(chan string)
+	go findAvailableMoviesAsync(movies, theatreIDs, availableMovies)
+	return availableMovies
+}
+
+func findAvailableMoviesAsync(movies []string, theatreIDs string, availableChan chan<- string) {
 	wg := sync.WaitGroup{}
 	theatreIDsRegex := regexp.MustCompile(strings.ReplaceAll(theatreIDs, ",", "|"))
 

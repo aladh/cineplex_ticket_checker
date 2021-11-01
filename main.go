@@ -21,14 +21,12 @@ func init() {
 
 func main() {
 	movies := strings.Split(flag.Arg(0), ",")
-	availableChan := make(chan string, len(movies))
-
-	go checker.FindAvailableMovies(movies, theatreIDs, availableChan)
-	sendWebhooks(availableChan)
+	availableMovies := checker.FindAvailableMovies(movies, theatreIDs)
+	notify(availableMovies)
 }
 
-func sendWebhooks(availableChan <-chan string) {
-	for movie := range availableChan {
+func notify(availableMovies <-chan string) {
+	for movie := range availableMovies {
 		message := fmt.Sprintf("Tickets to %s are available: %s", movie, checker.MovieUrl(movie))
 		log.Println(message)
 
