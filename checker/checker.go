@@ -11,7 +11,7 @@ import (
 )
 
 const baseURL = "https://www.cineplex.com/Movie/"
-const availableMessage = "Check out showtimes for this movie"
+const availabilityIndicator = "btn-gettickets"
 
 func FindAvailableMovies(movies []string, theatreIDs string) <-chan string {
 	availableMovies := make(chan string)
@@ -81,7 +81,7 @@ func isAvailable(movie string, theatreIDsRegex *regexp.Regexp) (bool, error) {
 	html := string(respBytes)
 
 	// Reduce false positives by checking for this
-	if !strings.Contains(html, availableMessage) {
+	if !strings.Contains(html, availabilityIndicator) {
 		return false, nil
 	}
 
