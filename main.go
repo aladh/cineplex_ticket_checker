@@ -10,18 +10,16 @@ import (
 	"github.com/aladh/cineplex_ticket_checker/webhook"
 )
 
-var theatreIDs string
 var webhookURL string
 
 func init() {
-	flag.StringVar(&theatreIDs, "t", "", "A comma-separated list of theatre IDs to look for")
 	flag.StringVar(&webhookURL, "w", "", "A URL to send webhooks to when movies are available")
 	flag.Parse()
 }
 
 func main() {
 	movies := strings.Split(flag.Arg(0), ",")
-	availableMovies := checker.FindAvailableMovies(movies, theatreIDs)
+	availableMovies := checker.FindAvailableMovies(movies)
 	notify(availableMovies)
 }
 

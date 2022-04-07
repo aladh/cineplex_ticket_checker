@@ -5,7 +5,6 @@ import (
 	"io"
 	"log"
 	"net/http"
-	"regexp"
 	"strings"
 	"sync"
 )
@@ -13,9 +12,9 @@ import (
 const baseURL = "https://www.cineplex.com/Movie/"
 const availabilityIndicator = "btn-gettickets"
 
-func FindAvailableMovies(movies []string, theatreIDs string) <-chan string {
+func FindAvailableMovies(movies []string) <-chan string {
 	availableMovies := make(chan string)
-	go findAvailableMoviesAsync(movies, theatreIDs, availableMovies)
+	go findAvailableMoviesAsync(movies, availableMovies)
 	return availableMovies
 }
 
@@ -23,9 +22,8 @@ func MovieUrl(movie string) string {
 	return baseURL + movie
 }
 
-func findAvailableMoviesAsync(movies []string, theatreIDs string, availableChan chan<- string) {
+func findAvailableMoviesAsync(movies []string, availableChan chan<- string) {
 	wg := sync.WaitGroup{}
-	theatreIDsRegex := regexp.MustCompile(strings.ReplaceAll(theatreIDs, ",", "|"))
 
 	for _, movie := range movies {
 		wg.Add(1)
@@ -33,7 +31,7 @@ func findAvailableMoviesAsync(movies []string, theatreIDs string, availableChan 
 		go func(movie string) {
 			defer wg.Done()
 
-			available, err := isAvailable(movie, theatreIDsRegex)
+			available, err := isAvailable(movie)
 			if err != nil {
 				log.Fatalf("error checking movie %s: %s\n", movie, err)
 				return
@@ -49,7 +47,7 @@ func findAvailableMoviesAsync(movies []string, theatreIDs string, availableChan 
 	close(availableChan)
 }
 
-func isAvailable(movie string, theatreIDsRegex *regexp.Regexp) (bool, error) {
+func isAvailable(movie string) (bool, error) {
 	log.Printf("Checking %s\n", movie)
 
 	client := &http.Client{
@@ -80,10 +78,5 @@ func isAvailable(movie string, theatreIDsRegex *regexp.Regexp) (bool, error) {
 
 	html := string(respBytes)
 
-	// Reduce false positives by checking for this
-	if !strings.Contains(html, availabilityIndicator) {
-		return false, nil
-	}
-
-	return theatreIDsRegex.MatchString(html), nil
+	return strings.Contains(html, availabilityIndicator), nil
 }
