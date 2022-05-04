@@ -9,7 +9,7 @@ import (
 	"sync"
 )
 
-const baseURL = "https://www.cineplex.com/Movie/"
+const baseURL = "https://www.cineplex.com/movie/"
 const availabilityIndicator = "btn-gettickets"
 
 func FindAvailableMovies(movies []string) <-chan string {
