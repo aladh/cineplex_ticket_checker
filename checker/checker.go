@@ -68,7 +68,8 @@ func isAvailable(movie string) (bool, error) {
 	}()
 
 	if res.StatusCode != 200 {
-		return false, fmt.Errorf("received bad response %s for movie %s", res.Status, movie)
+		log.Printf("received bad response %s for movie %s\n", res.Status, movie)
+		return false, nil
 	}
 
 	respBytes, err := io.ReadAll(res.Body)
