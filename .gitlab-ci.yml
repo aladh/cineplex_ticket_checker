@@ -13,14 +13,14 @@ lint:
 
 binary:
   stage: build
-  image: golang:1.18-bullseye
+  image: golang:1.19-bullseye
   script: go build
   except:
     - schedules
 
 check-availability:
   stage: run
-  image: golang:1.18-bullseye
+  image: golang:1.19-bullseye
   before_script:
     - go build
   script:
