@@ -10,7 +10,7 @@ import (
 )
 
 const baseURL = "https://www.cineplex.com/movie/"
-const availabilityIndicator = "Get Tickets</button>"
+const availabilityIndicator = `"hasShowtimes":true`
 
 func FindAvailableMovies(movies []string) <-chan string {
 	availableMovies := make(chan string)
